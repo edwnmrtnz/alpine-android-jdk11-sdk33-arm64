@@ -1,16 +1,10 @@
 ARG JDK_VERSION="11-aarch64"
 
-# docker pull bellsoft/liberica-openjdk-alpine:11-aarch64
-
 FROM bellsoft/liberica-openjdk-alpine:${JDK_VERSION}
 LABEL maintainer="Edwin Martinez <dev.edwinmartinez@gmail.com>"
 
-ARG CMDLINE_VERSION="9.9"
+ARG CMDLINE_VERSION="9.0"
 ARG SDK_TOOLS_VERSION="9477386"
-ARG BUILD_TOOLS="33.0.2"
-ARG TARGET_SDK="33"
-
-ENV PATH $PATH:${ANDROID_SDK_ROOT}/build-tools/${BUILD_TOOLS}
 ENV ANDROID_SDK_ROOT "/opt/sdk"
 ENV ANDROID_HOME ${ANDROID_SDK_ROOT}
 ENV PATH $PATH:${ANDROID_SDK_ROOT}/cmdline-tools/${CMDLINE_VERSION}/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/extras/google/instantapps
@@ -28,11 +22,19 @@ RUN apk upgrade && \
     yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses && \ 
     sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --install "platform-tools" "extras;google;instantapps" 
 
-# Install SDK Packages
+WORKDIR /home/android
+
+ARG BUILD_TOOLS="33.0.2"
+ARG TARGET_SDK="33"
+ENV PATH $PATH:${ANDROID_SDK_ROOT}/build-tools/${BUILD_TOOLS}
+
+ARG BUILD_TOOLS
+ARG TARGET_SDK
+
+ENV PATH $PATH:${ANDROID_SDK_ROOT}/build-tools/${BUILD_TOOLS}
+
 RUN sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" --install "build-tools;${BUILD_TOOLS}" "platforms;android-${TARGET_SDK}" && \
     sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" --uninstall emulator
 
-
-WORKDIR /home/android
 
 CMD ["/bin/bash"]
